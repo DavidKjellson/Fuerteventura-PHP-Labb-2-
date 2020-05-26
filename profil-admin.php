@@ -2,8 +2,8 @@
 
     function connectToDatabase(){
         $hostname = "localhost";
-        $username = "admin";
-        $password = "admin";
+        $username = "root";
+        $password = "root";
 
         try {
 
