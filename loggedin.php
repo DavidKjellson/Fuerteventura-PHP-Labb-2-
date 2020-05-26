@@ -48,17 +48,4 @@ if(isset($_POST['log-out'])){
 
 
 
-<!-- 
-// $count=mysql_fetch_array($result);
-
-// if($count > 0){
-//   session_register("username");
-//   session_register("password");
-//   header("location:success.php");
-// } else {
-//   echo 'Wrong Username or Password! Return to <a href="index.html">login</a>';
-//   }
-?> -->
-
-
 
