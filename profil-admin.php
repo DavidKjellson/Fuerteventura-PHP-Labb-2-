@@ -3,8 +3,8 @@
     function displayData(){
         //Kontot i phpmyadmin
         $hostname = "localhost";
-        $username = "admin";
-        $password = "admin";
+        $username = "root";
+        $password = "root";
 
         try {
                 //koppla upp oss till databasen
@@ -43,11 +43,11 @@
                     }
                     //Fetcha våra användares aktiviteter
                     $getActivities = $database->prepare("SELECT `activity_name`
-                    FROM `users`
-                    INNER JOIN `user_activities` ON `user_activities`.`ua_user` = `users`.`user_id`
-                    INNER JOIN `activities` ON `activities`.`activity_id` = `user_activities`.`ua_activity`
-                    WHERE `user_id`= $id -- använd id:t vi sparade innan
-                    ORDER BY `activity_name` ASC");
+                                                        FROM `users`
+                                                        INNER JOIN `user_activities` ON `user_activities`.`ua_user` = `users`.`user_id`
+                                                        INNER JOIN `activities` ON `activities`.`activity_id` = `user_activities`.`ua_activity`
+                                                        WHERE `user_id`= $id -- använd id:t vi sparade innan
+                                                        ORDER BY `activity_name` ASC");
                     $getActivities->execute();
                     $activities = $getActivities->fetchAll();
                     //skriv ut aktiviteterna
