@@ -37,7 +37,7 @@ function displayData()
                                         FROM `users`
                                         WHERE `username`!='admin' -- vi vill inte att admin ska kunna ta bort sitt eget konto
                                         ORDER BY `paid_the_fee` DESC, `full_name` ASC 
-                                        LIMIT 10");
+                                        -- LIMIT 10");
     $getUsers->execute();
 
     $users = $getUsers->fetchAll();
