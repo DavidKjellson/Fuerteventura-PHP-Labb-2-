@@ -2,7 +2,10 @@ body {
   font-family: "Lato", sans-serif;
 }
 
-
+table{
+  display: flex;
+  justify-content: center;
+}
 
 .main-head {
   height: 150px;
