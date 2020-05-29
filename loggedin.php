@@ -12,6 +12,10 @@ if (isset($_POST['updateUser'])) {
   updateUser();
 }
 
+if (isset($_POST['updateactivities'])) {
+  updateActivities();
+}
+
 //Funktion att koppla till databasen samt skriva ut vår data
 function displayData()
 {
@@ -89,7 +93,19 @@ function displayData()
                   <input type="hidden" name="userId" value="' . $id . '">
                   <input type="submit" value="❌" name="deleteUser">
                 </form></td>';
-
+      // Fetcha alla aktiveter
+      $getAll = $database->prepare("SELECT *
+                                      FROM activities");
+      $getAll->execute();
+      $allActivities = $getAll->fetchAll();
+      echo '<td><form method="post">
+      <input type="hidden" name="user_id" value="' . $id . '">';
+      foreach ($allActivities as $allActivity) {
+        echo '<input type="checkbox" id="' . $allActivity['activity_id'] . '" name="activities[]" value="' . $allActivity['activity_id'] . '">
+              <label for="' . $allActivity['activity_name'] . '" style="font-size: 15px">' . $allActivity['activity_name'] . '</label>';
+      }
+      echo '<input type="submit" name="updateactivities">';
+      echo '</form></td>';
       //Avsluta vår html tabell
       echo '</tr>';
     }
@@ -101,7 +117,8 @@ function displayData()
   $database = null;
 }
 
-function addNewUser($username, $password, $firstName, $lastName, $payment, $activity1, $activity2, $activity3){
+function addNewUser($username, $password, $firstName, $lastName, $payment, $activity1, $activity2, $activity3)
+{
   //logga in i databasen
   $dbHostname = "localhost";
   $dbUsername = "root";
@@ -109,44 +126,42 @@ function addNewUser($username, $password, $firstName, $lastName, $payment, $acti
 
   //Räkna hur många aktiviteter användaren är med i
   $activities = array();
-  if($activity1){
-      array_push($activities, $activity1);
+  if ($activity1) {
+    array_push($activities, $activity1);
   }
-  if($activity2){
-      array_push($activities, $activity2);
+  if ($activity2) {
+    array_push($activities, $activity2);
   }
-  if($activity3){
-      array_push($activities, $activity3);
+  if ($activity3) {
+    array_push($activities, $activity3);
   }
   $numberOfActivities = count($activities);
 
   try {
-      //koppla upp oss till databasen
-      $database = new PDO("mysql:host=$dbHostname;dbname=php-labb-2", $dbUsername, $dbPassword);
-      $database->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-      
-      //lägg till användaren
-      $database->exec("INSERT
+    //koppla upp oss till databasen
+    $database = new PDO("mysql:host=$dbHostname;dbname=php-labb-2", $dbUsername, $dbPassword);
+    $database->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    //lägg till användaren
+    $database->exec("INSERT
                        INTO `users`(`username`, `password`, `full_name`, `paid_the_fee`, `number_of_activities`)
                        VALUES ('$username', '$password', '$firstName $lastName', '$payment', '$numberOfActivities')");
 
-      //lägg till användarens aktiviteter
-      if($numberOfActivities > 0){
-          $userId = $database->lastInsertId();
-          foreach($activities as $activity){
-              $database->exec("INSERT
+    //lägg till användarens aktiviteter
+    if ($numberOfActivities > 0) {
+      $userId = $database->lastInsertId();
+      foreach ($activities as $activity) {
+        $database->exec("INSERT
                                INTO `user_activities`(`ua_user`, `ua_activity`)
                                VALUES ('$userId', '$activity')");
-          }
       }
-      
-      //ladda om sidan så användaren kan se resultatet direkt
-      header("Refresh:0");
-  }
-  catch(PDOException $e){
-      
-      echo "⚠️ Connection failed: " . $e->getMessage();
-  
+    }
+
+    //ladda om sidan så användaren kan se resultatet direkt
+    header("Refresh:0");
+  } catch (PDOException $e) {
+
+    echo "⚠️ Connection failed: " . $e->getMessage();
   }
 }
 
@@ -169,7 +184,6 @@ function deleteUser($userId)
 
     //ladda om sidan så användaren kan se resultatet direkt
     header("Refresh:0");
-
   } catch (PDOException $e) {
     echo "⚠️ Connection failed: " . $e->getMessage();
   }
@@ -188,14 +202,41 @@ function updateUser()
     $sql = "UPDATE users SET paid_the_fee = !paid_the_fee WHERE user_id = :user_id";
     $sth = $database->prepare($sql);
     $sth->execute([':user_id' => $_POST['user_id']]);
-    // $database->prepare("UPDATE users SET paid_the_fee = :paid_the_fee, user_activities = :user_activities WHERE user_id = :user_id");
-    // $database->exec([':paid_the_fee' => $_POST['paid_the_fee'], ':user_activities' => $_POST['user_activities'], ':user_id' => $_POST['user_id']]);
   } catch (PDOException $e) {
 
     echo "⚠️ Connection failed: " . $e->getMessage();
   }
 }
 
+function updateActivities()
+{
+  $hostname = "localhost";
+  $username = "root";
+  $password = "root";
+
+  try {
+    $database = new PDO("mysql:host=$hostname;dbname=php-labb-2", $username, $password);
+    $database->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    $sql = "DELETE FROM user_activities WHERE ua_user = :user_id";
+    $sth = $database->prepare($sql);
+    $sth->execute([':user_id' => $_POST['user_id']]);
+  } catch (PDOException $e) {
+    echo "⚠️ Connection failed: " . $e->getMessage();
+  }
+  try {
+    $database = new PDO("mysql:host=$hostname;dbname=php-labb-2", $username, $password);
+    $database->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    foreach ($_POST['activities'] as $activity) {
+      $sql = "INSERT INTO user_activities (ua_user, ua_activity) VALUES (:user, :activity)";
+      $sth = $database->prepare($sql);
+      $sth->execute([':user' => $_POST['user_id'], ':activity' => $activity]);
+    }
+  } catch (PDOException $e) {
+    echo "⚠️ Connection failed: " . $e->getMessage();
+  }
+}
 
 ?>
 
@@ -210,7 +251,7 @@ function updateUser()
 </head>
 
 <body>
-<header style="position:absolute;left:0;top:0;overflow:auto;width:100%;height:10px;background-color: rgb(255, 92, 92);"></header>
+  <header style="position:absolute;left:0;top:0;overflow:auto;width:100%;height:10px;background-color: rgb(255, 92, 92);"></header>
 
   <div class="welcomeAdmin">
     <?php
@@ -228,16 +269,16 @@ function updateUser()
       }
       ?>
     </table>
-    
+
     <!--Knapp för att skapa nya användare under datan-->
     <form method="post">
       <input type="submit" value="Lägg till ny användare" name="newUser">
     </form>
 
     <?php
-      //formulär för att skapa ny användare
-      if (isset($_POST['newUser'])) {
-        echo '
+    //formulär för att skapa ny användare
+    if (isset($_POST['newUser'])) {
+      echo '
         <form method="post">
       
         <p>Användarnamn och lösenord*</p>
@@ -269,18 +310,18 @@ function updateUser()
         <input type="submit" value="Skicka" name="addNewUser">
         </form>
         ';
-      }
+    }
 
-      //kallar på funktionen att skapa den nya användaren
-      if (isset($_POST['addNewUser'])) {
-        unset($_POST['newUser']);
-        addNewUser($_POST['username'], $_POST['password'], $_POST['firstName'], $_POST['lastName'], $_POST['payment'], $_POST['activity1'], $_POST['activity2'], $_POST['activity3']);
-      }
+    //kallar på funktionen att skapa den nya användaren
+    if (isset($_POST['addNewUser'])) {
+      unset($_POST['newUser']);
+      addNewUser($_POST['username'], $_POST['password'], $_POST['firstName'], $_POST['lastName'], $_POST['payment'], $_POST['activity1'], $_POST['activity2'], $_POST['activity3']);
+    }
 
-      //kallar på funktionen att ta bort användaren
-      if (isset($_POST['deleteUser'])) {
-        deleteUser($_POST['userId']);
-      }
+    //kallar på funktionen att ta bort användaren
+    if (isset($_POST['deleteUser'])) {
+      deleteUser($_POST['userId']);
+    }
     ?>
 
     <!--Knapp att logga ut från sidan-->
