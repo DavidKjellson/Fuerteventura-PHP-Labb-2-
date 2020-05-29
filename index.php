@@ -14,9 +14,14 @@
   
 
 <?php
-// Log in
-if(isset($_POST['signin'])){
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
+Include 'uname-psw.php';
+// Log in
+
+if(isset($_POST['signin'])){
   $username = $_POST['username'];
   $password = $_POST['password'];
 
@@ -27,8 +32,10 @@ if(isset($_POST['signin'])){
 ?>
 
 <div class="wrong">
-  <?php
-if($username=="user" && $password=="user"){
+<?php
+$login = new AdminLogIn;
+
+if($username==$login->username && $password==$login->password){ 
   header('location: loggedin.php');
 } 
 else {
@@ -38,32 +45,31 @@ else {
 ?>
 </div>
 
-
 <div class="sidenav">
-         <div class="login-main-text">
-           <form action="index.php" method="post">
-            <h1>Välkommen till idrottsföreningen Svalan </h1>
-            <p>Inloggningssidan för admins</p>
-         </div>
+      <div class="login-main-text">
+        <form action="index.php" method="post">
+        <h1>Välkommen till idrottsföreningen Svalan </h1>
+        <p>Inloggningssidan för admins</p>
       </div>
-      <div class="main">
-         <div class="col-md-6 col-sm-12">
-            <div class="login-form">
+  </div>
+  <div class="main">
+      <div class="col-md-6 col-sm-12">
+        <div class="login-form">
 
-                  <div class="form-group">
-                     <label>Username</label>
-                     <input type="text" class="form-control" name="username" placeholder="Username">
-                  </div>
+              <div class="form-group">
+                  <label>Username</label>
+                  <input type="text" class="form-control" name="username" placeholder="Username">
+              </div>
 
-                   <div class="form-group">
-                     <label>Password</label>
-                     <input type="password" name="password" class="form-control" placeholder="**********">
-                  </div> 
-                  <button type="submit" name="signin"  value="SIGN IN" class="btn btn-black">Login</button> 
-               </form>
-               </div>
+                <div class="form-group">
+                  <label>Password</label>
+                  <input type="password" name="password" class="form-control" placeholder="**********">
+              </div> 
+              <button type="submit" name="signin"  value="SIGN IN" class="btn btn-black">Login</button> 
+            </form>
             </div>
-         </div>
+        </div>
+      </div>
 </body>
 </html>
 
